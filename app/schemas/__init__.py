@@ -1,3 +1,3 @@
-from app.schemas.note import NoteCreate, NoteRead, NoteUpdate
+from app.schemas.note import NoteCreate, NotePage, NoteRead, NoteUpdate
 
-__all__ = ["NoteCreate", "NoteRead", "NoteUpdate"]
+__all__ = ["NoteCreate", "NotePage", "NoteRead", "NoteUpdate"]

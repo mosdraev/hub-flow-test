@@ -44,7 +44,7 @@ def test_create_title_only_body_null(client):
 def test_list_empty(client):
     resp = client.get("/notes")
     assert resp.status_code == 200
-    assert resp.json() == []
+    assert resp.json()["items"] == []
 
 
 def test_list_newest_first(client):
@@ -52,7 +52,7 @@ def test_list_newest_first(client):
     time.sleep(0.01)
     second = _create(client, title="second")
 
-    ids = [n["id"] for n in client.get("/notes").json()]
+    ids = [n["id"] for n in client.get("/notes").json()["items"]]
     assert ids == [second["id"], first["id"]]
 
 
@@ -96,7 +96,7 @@ def test_delete_removes_note(client):
     assert resp.content == b""
 
     assert client.get(f"/notes/{note['id']}").status_code == 404
-    assert client.get("/notes").json() == []
+    assert client.get("/notes").json()["items"] == []
 
 
 # Failure path
@@ -118,7 +118,7 @@ def test_delete_removes_note(client):
 )
 def test_create_invalid_returns_422(client, payload):
     assert client.post("/notes", json=payload).status_code == 422
-    assert client.get("/notes").json() == []
+    assert client.get("/notes").json()["items"] == []
 
 
 @pytest.mark.parametrize("method", ["get", "patch", "delete"])
@@ -196,5 +196,5 @@ def test_list_tiebreak_by_id_when_created_at_equal(client, session):
     session.add_all([a, b])
     session.commit()
 
-    ids = [n["id"] for n in client.get("/notes").json()]
+    ids = [n["id"] for n in client.get("/notes").json()["items"]]
     assert ids == [b.id, a.id]

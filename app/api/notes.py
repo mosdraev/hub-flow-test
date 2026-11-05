@@ -1,10 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_session
-from app.schemas import NoteCreate, NoteRead, NoteUpdate
+from app.schemas import NoteCreate, NotePage, NoteRead, NoteUpdate
 from app.services import notes as service
 
 router = APIRouter(prefix="/notes", tags=["notes"])
@@ -17,9 +17,15 @@ def create_note(payload: NoteCreate, session: SessionDep):
     return service.create_note(session, title=payload.title, body=payload.body)
 
 
-@router.get("", response_model=list[NoteRead])
-def list_notes(session: SessionDep):
-    return service.list_notes(session)
+@router.get("", response_model=NotePage)
+def list_notes(
+    session: SessionDep,
+    limit: Annotated[int, Query(ge=1, le=service.MAX_PAGE_LIMIT)] = service.DEFAULT_PAGE_LIMIT,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    q: Annotated[str | None, Query(max_length=service.SEARCH_MAX_LENGTH)] = None,
+):
+    items, total = service.list_notes(session, limit=limit, offset=offset, q=q)
+    return NotePage(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.get("/{note_id}", response_model=NoteRead)

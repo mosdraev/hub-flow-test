@@ -47,3 +47,10 @@ class NoteRead(BaseModel):
     def _assume_utc(cls, value: datetime) -> datetime:
         # Timestamps are always written in UTC, but some backends (SQLite) drop tzinfo.
         return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
+
+
+class NotePage(BaseModel):
+    items: list[NoteRead]
+    total: int
+    limit: int
+    offset: int
